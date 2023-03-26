@@ -27,6 +27,7 @@ public class BatchConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final CustomerRepository customerRepository;
+    private final CustomerDataProcessor processor;
 
     @Value("${customer.processor.resource}")
     private String CUSTOMER_DATA_RESOURCE;
@@ -58,11 +59,6 @@ public class BatchConfiguration {
     }
 
     @Bean
-    public CustomerProcessor processor() {
-        return new CustomerProcessor();
-    }
-
-    @Bean
     public RepositoryItemWriter<Customer> writer() {
         RepositoryItemWriter<Customer> writer = new RepositoryItemWriter<>();
         writer.setRepository(customerRepository);
@@ -75,7 +71,7 @@ public class BatchConfiguration {
         return stepBuilderFactory.get("customer-data-processor-step")
                 .<Customer, Customer>chunk(10)
                 .reader(reader())
-                .processor(processor())
+                .processor(processor)
                 .writer(writer())
                 .build();
     }

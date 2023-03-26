@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/jobs")
+@RequestMapping("/api/jobs")
 @RequiredArgsConstructor
-public class JonController {
+public class JobController {
 
     private final JobLauncher jobLauncher;
     private final Job job;
