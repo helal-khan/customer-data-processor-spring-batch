@@ -12,7 +12,13 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "customers")
+@Table(
+        name = "customers",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"phone"}, name = "cc_customers_phone"),
+                @UniqueConstraint(columnNames = {"email"}, name = "cc_customers_email")
+        }
+)
 public class Customer {
 
     @Id

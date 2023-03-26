@@ -17,4 +17,9 @@ spring:
     jdbc:
       initialize-schema: always
     job:
-      enabled: true
+      enabled: false
+
+
+customer:
+  processor:
+    resource: src/main/resources/1M-customers.txt
