@@ -18,15 +18,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
-public class BatchConfiguration {
+public class CustomerBatchConfiguration {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
     private final CustomerRepository customerRepository;
+    private final StepBuilderFactory stepBuilderFactory;
+    private final JobBuilderFactory jobBuilderFactory;
     private final CustomerDataProcessor processor;
 
     @Value("${customer.processor.resource}")
@@ -37,7 +40,7 @@ public class BatchConfiguration {
     public FlatFileItemReader<Customer> reader() {
         FlatFileItemReader<Customer> itemReader = new FlatFileItemReader<>();
         itemReader.setResource(new FileSystemResource(CUSTOMER_DATA_RESOURCE));
-        itemReader.setName("customerDataReader");
+        itemReader.setName("customer-data-reader");
         itemReader.setLineMapper(lineMapper());
         return itemReader;
     }
@@ -68,20 +71,28 @@ public class BatchConfiguration {
 
     @Bean
     public Step step1() {
-        return stepBuilderFactory.get("customer-data-processor-step")
-                .<Customer, Customer>chunk(10)
+        return stepBuilderFactory.get("customer-data-process-step").<Customer, Customer>chunk(1000)
                 .reader(reader())
                 .processor(processor)
                 .writer(writer())
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
     @Bean
     public Job runJob() {
-        return jobBuilderFactory.get("process-customer")
+        return jobBuilderFactory.get("process-customer-data-job")
                 .flow(step1())
-                .end()
-                .build();
+                .end().build();
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(64);
+        taskExecutor.setMaxPoolSize(64);
+        taskExecutor.setQueueCapacity(64);
+        return taskExecutor;
     }
 
 

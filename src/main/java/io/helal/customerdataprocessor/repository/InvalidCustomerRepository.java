@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface InvalidCustomerRepository extends JpaRepository<InvalidCustomer, Long> {
-    Optional<InvalidCustomer> findByEmailOrPhone(String email, String phone);
 }
